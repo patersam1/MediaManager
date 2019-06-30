@@ -8,12 +8,14 @@ Write-Host $name
 Write-Host $category
 Write-Host $tag
 
+$libIndex = 0
 if($category -eq "Movie"){
     Write-Host "moving Movie"
     Move-Item -path $path -Destination "D:\Temp"
-    Remove-Item -path $path -Recurse 
+    $libIndex = 29
 }else{
     Write-Host "A TV show"
+    $libIndex = 30
     # $sourceChildren = Get-ChildItem -Path $source -Include *.mp4, *.mkv -Recurse
     # foreach ($child in $sourceChildren){
     # Write-Host $child.Name
@@ -35,6 +37,7 @@ if($category -eq "Movie"){
     # }
 
 }
+#& "/path/to/Plex Media Scanner --scan --refresh --section $libIndex"
 Read-Host -Prompt "Press any key to continue"
 
 
