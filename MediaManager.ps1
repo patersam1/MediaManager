@@ -1,21 +1,20 @@
-param($path, $name, $category, $tag)
+param($path, $name, $category)
 $source = 'TestSource'
-$tvShowDest = 'TestTVShowDest'
-$moviesDest = 'TestMoviesDest'
-
+$tvShowDest = 'D:\Temp'
+$moviesDest = 'D:\Movies'
+$compDownloadsDir = "C:\Users\Media\Downloads\Completed\*"
 Write-Host $path
 Write-Host $name
 Write-Host $category
-Write-Host $tag
 
 $libIndex = 0
 if($category -eq "Movie"){
     Write-Host "moving Movie"
-    Move-Item -path $path -Destination "D:\Temp"
-    $libIndex = 29
+	Move-Item -Path $compDownloadsDir -Destination $moviesDest -Force
+    $libIndex = 1
 }else{
     Write-Host "A TV show"
-    $libIndex = 30
+    $libIndex = 2
     # $sourceChildren = Get-ChildItem -Path $source -Include *.mp4, *.mkv -Recurse
     # foreach ($child in $sourceChildren){
     # Write-Host $child.Name
@@ -37,7 +36,7 @@ if($category -eq "Movie"){
     # }
 
 }
-#& "/path/to/Plex Media Scanner --scan --refresh --section $libIndex"
+"C:\Program Files (x86)\Plex\Plex Media Server\Plex Media Scanner.exe" --scan --section $libIndex
 Read-Host -Prompt "Press any key to continue"
 
 
