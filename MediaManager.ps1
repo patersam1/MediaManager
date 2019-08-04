@@ -1,42 +1,62 @@
 param($path, $name, $category)
-$source = 'TestSource'
-$tvShowDest = 'D:\Temp'
+$tvShowDest = 'D:\TvShows'
 $moviesDest = 'D:\Movies'
-$compDownloadsDir = "C:\Users\Media\Downloads\Completed\*"
+# $moviesDest = 'TestMoviesDest'
+$compDownloadsDir = "C:\Users\Media\Downloads\Completed"
+# $compDownloadsDir = "TestSource"
 Write-Host $path
 Write-Host $name
 Write-Host $category
 
 $libIndex = 0
-if($category -eq "Movie"){
-    Write-Host "moving Movie"
-	Move-Item -Path $compDownloadsDir -Destination $moviesDest -Force
-    $libIndex = 1
-}else{
-    Write-Host "A TV show"
-    $libIndex = 2
-    # $sourceChildren = Get-ChildItem -Path $source -Include *.mp4, *.mkv -Recurse
-    # foreach ($child in $sourceChildren){
-    # Write-Host $child.Name
+$sourceChildren = Get-ChildItem -Path $compDownloadsDir -Include *.mp4, *.mkv -Recurse
+foreach ($child in $sourceChildren){
+    Write-Host $child.Name
 
-    # # $child.Name -match "S\d\dE\d\d"
-    # $newName
-    # #determine if a tv show or movie
-    #     if ($child.Name -match "S\d\dE\d\d"){
-            
-    #         $epInfo = $matches[0]
-            
-    #         $epInfo -match "((?<=S)\d+)"
-    #         $season = $matches[0]
-    #         $epInfo -match "((?<=E)\d+)"
-    #         $ep = $matches[0]
-    #         #add file to this season dir if not already one
-    #         Write-Host $child.Name $season $ep
-    #     }
-    # }
+    #determine if a tv show or movie
+    if ($child.Name -match "S\d\dE\d\d"){
+        $libIndex = 2
+
+        $epInfo = $matches[0]
+        
+        $epInfo -match "((?<=S)\d+)"
+        $season = $matches[0]
+        $child.Name -match "^.*(?=(\.S\d))"
+        $showName = $matches[0]
+        $showName = $showName -replace "\.", " "
+
+        $showPaths = $showName, $season #save duplicate code
+        $showPath = $tvShowDest
+        foreach( $childPath in $showPaths){
+            $showPath = Join-Path -Path $showPath -ChildPath $childPath
+            if (-Not (Test-Path $showPath)){
+                New-Item -ItemType directory -Path $showPath
+            }
+        }
+
+        Move-Item $child -Destination $showPath
+        #note that if the capitisiation of show names screws up then could create a json with all shows that have been added,
+        #then .tolower(), compare key, then get correct capitisiation 
+    }else{
+        #Movie
+        Write-Host "Moving Movie"
+        $moviePath = Join-Path -Path $moviesDest -ChildPath $child.Directory.name
+        write-host $moviePath
+        New-Item -ItemType directory -Path $moviePath
+
+        #move only movie and subtitles
+        $movieChildren = Get-ChildItem -LiteralPath $child.Directory -Include *.mp4, *.mkv, *.srt, *.sub
+        foreach( $movchild in $movieChildren){
+            Move-Item -LiteralPath $movchild -Destination $moviePath
+        }
+
+        Remove-Item -LiteralPath $child.Directory -Recurse
+        $libIndex = 1
+    }
 
 }
+
+
 "C:\Program Files (x86)\Plex\Plex Media Server\Plex Media Scanner.exe" --scan --section $libIndex
-Read-Host -Prompt "Press any key to continue"
 
 
