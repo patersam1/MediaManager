@@ -36,7 +36,7 @@ if($category -eq "Movie"){
     # }
 
 }
-"C:\Program Files (x86)\Plex\Plex Media Server\Plex Media Scanner.exe" --scan --section $libIndex
+& "C:\Program Files (x86)\Plex\Plex Media Server\Plex Media Scanner.exe" --scan --section $libIndex
 Read-Host -Prompt "Press any key to continue"
 
 
