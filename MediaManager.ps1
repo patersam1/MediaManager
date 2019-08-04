@@ -1,5 +1,5 @@
 param($path, $name, $category)
-$tvShowDest = 'D:\TvShows'
+$tvShowDest = 'D:\TV Shows'
 $moviesDest = 'D:\Movies'
 # $moviesDest = 'TestMoviesDest'
 $compDownloadsDir = "C:\Users\Media\Downloads\Completed"
@@ -15,6 +15,7 @@ foreach ($child in $sourceChildren){
 
     #determine if a tv show or movie
     if ($child.Name -match "S\d\dE\d\d"){
+		continue
         $libIndex = 2
 
         $epInfo = $matches[0]
@@ -55,8 +56,8 @@ foreach ($child in $sourceChildren){
     }
 
 }
+#read-host -prompt "press a key"
 
-
-"C:\Program Files (x86)\Plex\Plex Media Server\Plex Media Scanner.exe" --scan --section $libIndex
+&"C:\Program Files (x86)\Plex\Plex Media Server\Plex Media Scanner.exe" --scan --section $libIndex
 
 
