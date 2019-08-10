@@ -2,7 +2,7 @@ param($path, $name, $category)
 $tvShowDest = 'D:\TV Shows'
 $moviesDest = 'D:\Movies'
 # $moviesDest = 'TestMoviesDest'
-$compDownloadsDir = "C:\Users\Media\Downloads\Completed"
+$compDownloadsDir = 'C:\Users\Media\Downloads\Completed'
 # $compDownloadsDir = "TestSource"
 Write-Host $path
 Write-Host $name
@@ -15,7 +15,7 @@ foreach ($child in $sourceChildren){
 
     #determine if a tv show or movie
     if ($child.Name -match "S\d\dE\d\d"){
-		continue
+		
         $libIndex = 2
 
         $epInfo = $matches[0]
@@ -34,30 +34,41 @@ foreach ($child in $sourceChildren){
                 New-Item -ItemType directory -Path $showPath
             }
         }
-
-        Move-Item $child -Destination $showPath
+		Write-Host "Moving: " $child
+        Move-Item -LiteralPath $child -Destination $showPath
+		if( $child.directory.name -ne 'Completed'){
+			Remove-Item -LiteralPath $child.Directory -Recurse -Force
+		}			#moves only the video so deletes the folder if in one
+		
         #note that if the capitisiation of show names screws up then could create a json with all shows that have been added,
         #then .tolower(), compare key, then get correct capitisiation 
     }else{
         #Movie
-        Write-Host "Moving Movie"
+		$libIndex = 1
+        #Write-Host "Moving Movie"
         $moviePath = Join-Path -Path $moviesDest -ChildPath $child.Directory.name
-        write-host $moviePath
+        #write-host $moviePath
         New-Item -ItemType directory -Path $moviePath
-
+		
         #move only movie and subtitles
-        $movieChildren = Get-ChildItem -LiteralPath $child.Directory -Include *.mp4, *.mkv, *.srt, *.sub
+        #$movieChildren = Get-ChildItem -LiteralPath $child.Directory -Force -Recurse -Filter  *.mp4, *.mkv, *.srt, *.sub 
+		$includeFilesExtensions = '.mp4', '.mkv', '.srt', '.sub' 
+		$movieChildren = Get-ChildItem -LiteralPath $child.Directory -Force -Recurse | Where-Object { $includeFilesExtensions -Contains $_.Extension }
+		
         foreach( $movchild in $movieChildren){
-            Move-Item -LiteralPath $movchild -Destination $moviePath
+			$moveChildPath = Join-Path -Path $child.directory -ChildPath $movchild
+			Write-Host "moving " $moveChildPath
+            Move-Item -LiteralPath $moveChildPath -Destination $moviePath
         }
-
-        Remove-Item -LiteralPath $child.Directory -Recurse
-        $libIndex = 1
+		
+        Remove-Item -LiteralPath $child.Directory -Recurse -Force
+        
     }
 
 }
 #read-host -prompt "press a key"
 
 &"C:\Program Files (x86)\Plex\Plex Media Server\Plex Media Scanner.exe" --scan --section $libIndex
+exit
 
 
